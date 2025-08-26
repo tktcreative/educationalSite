@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resistors in Series & Parallel - Interactive Science Lab</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* A very light gray */
+        }
+        .tab-btn.active {
+            background-color: #1d4ed8;
+            color: white;
+            border-color: #1d4ed8;
+        }
+    </style>
+</head>
+<body class="py-12 px-4 md:px-8">
+
+    <!-- Main container -->
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 tracking-tight">
+                Resistors in Series & Parallel
+            </h1>
+            <p class="text-lg text-gray-600 mt-3 max-w-3xl mx-auto">
+                Build circuits to understand how total resistance changes when resistors are in series vs. parallel.
+            </p>
+        </header>
+
+        <!-- Simulation Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Left Panel: Information & Controls -->
+            <div class="lg:col-span-1 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <div class="flex border-b mb-4">
+                    <button id="tab-series" class="tab-btn active flex-1 text-center font-semibold p-2 border-b-4">Series</button>
+                    <button id="tab-parallel" class="tab-btn flex-1 text-center font-semibold p-2 border-b-4 border-transparent">Parallel</button>
+                </div>
+
+                <!-- Series Info -->
+                <div id="info-series">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Series Circuit</h2>
+                    <p class="text-gray-600 mb-4">In a series circuit, resistors are connected end-to-end. The total resistance is the sum of all individual resistances.</p>
+                    <p class="font-mono bg-gray-100 p-2 rounded">R_eq = R₁ + R₂ + R₃</p>
+                </div>
+                <!-- Parallel Info -->
+                <div id="info-parallel" class="hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Parallel Circuit</h2>
+                    <p class="text-gray-600 mb-4">In a parallel circuit, resistors are connected on separate branches. The total resistance is less than any of the individual resistances.</p>
+                    <p class="font-mono bg-gray-100 p-2 rounded">1/R_eq = 1/R₁ + 1/R₂ + 1/R₃</p>
+                </div>
+
+                <h3 class="text-xl font-semibold text-gray-800 my-4">Controls (Voltage = 12V):</h3>
+                 <div class="space-y-4 mb-6">
+                    <div>
+                        <label for="slider-r1" class="font-semibold">Resistor 1 (R₁): <span id="label-r1">50</span> Ω</label>
+                        <input type="range" id="slider-r1" min="10" max="200" value="50" step="5" class="w-full">
+                    </div>
+                    <div>
+                        <label for="slider-r2" class="font-semibold">Resistor 2 (R₂): <span id="label-r2">50</span> Ω</label>
+                        <input type="range" id="slider-r2" min="10" max="200" value="50" step="5" class="w-full">
+                    </div>
+                    <div>
+                        <label for="slider-r3" class="font-semibold">Resistor 3 (R₃): <span id="label-r3">50</span> Ω</label>
+                        <input type="range" id="slider-r3" min="10" max="200" value="50" step="5" class="w-full">
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Calculations:</h3>
+                <div class="space-y-2 text-lg font-mono bg-blue-50 text-blue-700 p-4 rounded">
+                   <p>Total Resistance (R_eq): <span id="calc-req" class="font-bold"></span> Ω</p>
+                   <p>Total Current (I): <span id="calc-i" class="font-bold"></span> A</p>
+                </div>
+            </div>
+
+            <!-- Right Panel: Interactive Simulation -->
+            <div class="lg:col-span-2 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <div class="w-full h-[60vh] relative">
+                    <canvas id="simulation-canvas" class="w-full h-full bg-gray-800 rounded-lg border"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simulation-canvas');
+        const ctx = canvas.getContext('2d');
+        const sliders = {
+            r1: document.getElementById('slider-r1'),
+            r2: document.getElementById('slider-r2'),
+            r3: document.getElementById('slider-r3')
+        };
+        const labels = {
+            r1: document.getElementById('label-r1'),
+            r2: document.getElementById('label-r2'),
+            r3: document.getElementById('label-r3')
+        };
+        const calcs = {
+            req: document.getElementById('calc-req'),
+            i: document.getElementById('calc-i')
+        };
+        const tabs = {
+            series: document.getElementById('tab-series'),
+            parallel: document.getElementById('tab-parallel')
+        };
+        const infoPanels = {
+            series: document.getElementById('info-series'),
+            parallel: document.getElementById('info-parallel')
+        };
+
+        let circuitType = 'series';
+        let voltage = 12;
+        let resistances = { r1: 50, r2: 50, r3: 50 };
+        let electrons = [];
+        const numElectrons = 100;
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
+            setupElectrons();
+        }
+
+        function setupElectrons() {
+            electrons = [];
+            for (let i = 0; i < numElectrons; i++) {
+                electrons.push({ progress: Math.random() });
+            }
+        }
+
+        function drawResistor(x, y, vertical = false) {
+            ctx.beginPath();
+            if (vertical) {
+                ctx.moveTo(x, y - 25);
+                ctx.lineTo(x - 5, y - 20); ctx.lineTo(x + 5, y - 10);
+                ctx.lineTo(x - 5, y); ctx.lineTo(x + 5, y + 10);
+                ctx.lineTo(x - 5, y + 20); ctx.lineTo(x, y + 25);
+            } else {
+                ctx.moveTo(x - 25, y);
+                ctx.lineTo(x - 20, y - 5); ctx.lineTo(x - 10, y + 5);
+                ctx.lineTo(x, y - 5); ctx.lineTo(x + 10, y + 5);
+                ctx.lineTo(x + 20, y - 5); ctx.lineTo(x + 25, y);
+            }
+            ctx.stroke();
+        }
+
+        function draw() {
+            const w = canvas.width / (window.devicePixelRatio || 1);
+            const h = canvas.height / (window.devicePixelRatio || 1);
+            ctx.clearRect(0, 0, w, h);
+
+            let req, current;
+            if (circuitType === 'series') {
+                req = resistances.r1 + resistances.r2 + resistances.r3;
+            } else { // parallel
+                req = 1 / (1/resistances.r1 + 1/resistances.r2 + 1/resistances.r3);
+            }
+            current = voltage / req;
+
+            // Update UI
+            Object.keys(labels).forEach(key => labels[key].textContent = resistances[key]);
+            calcs.req.textContent = req.toFixed(1);
+            calcs.i.textContent = current.toFixed(3);
+            
+            // --- Drawing ---
+            ctx.strokeStyle = '#9ca3af';
+            ctx.lineWidth = 4;
+            
+            // Draw battery
+            ctx.fillStyle = 'white';
+            ctx.fillRect(w * 0.1, h * 0.45, 20, 10);
+            ctx.fillRect(w * 0.1, h * 0.55, 20, 10);
+            ctx.font = 'bold 20px Inter';
+            ctx.fillText('+', w * 0.08, h * 0.42);
+            ctx.fillText('-', w * 0.08, h * 0.65);
+            
+            if (circuitType === 'series') {
+                // Draw series circuit
+                ctx.beginPath();
+                ctx.moveTo(w * 0.15, h * 0.5); // Battery
+                ctx.lineTo(w * 0.15, h * 0.8); ctx.lineTo(w * 0.85, h * 0.8); // Bottom wire
+                ctx.lineTo(w * 0.85, h * 0.2); // Right wire
+                ctx.lineTo(w * 0.15, h * 0.2); // Top wire
+                ctx.lineTo(w * 0.15, h * 0.5); // Back to battery
+                ctx.stroke();
+                drawResistor(w * 0.3, h * 0.2);
+                drawResistor(w * 0.5, h * 0.2);
+                drawResistor(w * 0.7, h * 0.2);
+            } else { // parallel
+                // Draw parallel circuit
+                ctx.beginPath();
+                ctx.moveTo(w * 0.15, h * 0.5);
+                ctx.lineTo(w * 0.15, h * 0.8); ctx.lineTo(w * 0.85, h * 0.8); // Bottom wire
+                ctx.lineTo(w * 0.85, h * 0.5); // Right side
+                ctx.moveTo(w * 0.15, h * 0.5); ctx.lineTo(w * 0.15, h * 0.2); // Left side
+                ctx.lineTo(w * 0.85, h * 0.2); // Top wire
+                ctx.stroke();
+                
+                // Branches
+                const branchX = [w * 0.3, w * 0.5, w * 0.7];
+                branchX.forEach(x => {
+                    ctx.beginPath();
+                    ctx.moveTo(x, h * 0.2);
+                    ctx.lineTo(x, h * 0.8);
+                    ctx.stroke();
+                    drawResistor(x, h * 0.5, true);
+                });
+            }
+
+            // Animate electrons
+            const speed = current * 20; // Adjust multiplier for visual speed
+            electrons.forEach(e => {
+                e.progress = (e.progress + speed * 0.001) % 1;
+                // Simple animation for now - can be improved
+                const x = e.progress * w;
+                const y = h / 2 + Math.sin(e.progress * Math.PI * 2) * h * 0.3;
+                ctx.fillStyle = '#3b82f6';
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            requestAnimationFrame(draw);
+        }
+
+        function handleSliderChange(e) {
+            resistances[e.target.id.split('-')[1]] = parseInt(e.target.value);
+        }
+
+        Object.values(sliders).forEach(slider => slider.addEventListener('input', handleSliderChange));
+        
+        tabs.series.addEventListener('click', () => {
+            circuitType = 'series';
+            tabs.series.classList.add('active');
+            tabs.parallel.classList.remove('active');
+            infoPanels.series.classList.remove('hidden');
+            infoPanels.parallel.classList.add('hidden');
+        });
+        tabs.parallel.addEventListener('click', () => {
+            circuitType = 'parallel';
+            tabs.parallel.classList.add('active');
+            tabs.series.classList.remove('active');
+            infoPanels.parallel.classList.remove('hidden');
+            infoPanels.series.classList.add('hidden');
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // Initial setup
+        resizeCanvas();
+        draw();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convex Mirror Ray Diagram - Interactive Science Lab</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* A very light gray */
+        }
+        canvas {
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+    </style>
+</head>
+<body class="py-12 px-4 md:px-8">
+
+    <!-- Main container -->
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 tracking-tight">
+                Ray Diagrams: Convex Mirror
+            </h1>
+            <p class="text-lg text-gray-600 mt-3 max-w-3xl mx-auto">
+                Place an object at different positions to see how a convex mirror always forms a virtual, erect, and diminished image.
+            </p>
+        </header>
+
+        <!-- Simulation Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Left Panel: Information & Controls -->
+            <div class="lg:col-span-1 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Ray Diagram Rules</h2>
+                <ul class="list-decimal list-inside text-gray-600 space-y-2 mb-6">
+                    <li>A ray parallel to the principal axis reflects as if it came from the <strong>Focal Point (F)</strong>.</li>
+                    <li>A ray directed towards the <strong>Focal Point (F)</strong> reflects parallel to the principal axis.</li>
+                    <li>A ray directed towards the <strong>Center of Curvature (C)</strong> reflects back along the same path.</li>
+                </ul>
+                
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">How to Use:</h3>
+                 <p class="text-gray-600 mb-6">
+                    Click and drag the candle (the object) along the principal axis to change its position and observe the resulting image.
+                 </p>
+
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Image Characteristics:</h3>
+                <div id="image-info" class="space-y-2 text-lg font-mono bg-gray-50 p-4 rounded">
+                    <!-- Info will be updated by JS -->
+                </div>
+            </div>
+
+            <!-- Right Panel: Interactive Simulation -->
+            <div class="lg:col-span-2 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <div class="w-full h-[60vh] relative">
+                    <canvas id="simulation-canvas" class="w-full h-full bg-white rounded-lg border"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simulation-canvas');
+        const ctx = canvas.getContext('2d');
+        const imageInfoEl = document.getElementById('image-info');
+
+        let center = { x: 0, y: 0 };
+        let focalLength = 100;
+        let object = { x: 200, y: 0, height: 80 };
+        let isDragging = false;
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
+            
+            center.y = rect.height / 2;
+            center.x = rect.width / 2 + 100; // Position mirror towards the right
+            
+            draw();
+        }
+
+        function drawLine(x1, y1, x2, y2, color, dashed = false) {
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.5;
+            if (dashed) {
+                ctx.setLineDash([5, 5]);
+            }
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            ctx.setLineDash([]); // Reset for solid lines
+        }
+
+        function draw() {
+            const w = canvas.width / (window.devicePixelRatio || 1);
+            const h = canvas.height / (window.devicePixelRatio || 1);
+            ctx.clearRect(0, 0, w, h);
+
+            // For a convex mirror, F and C are behind the mirror
+            const F = { x: center.x + focalLength, y: center.y };
+            const C = { x: center.x + 2 * focalLength, y: center.y };
+            object.y = center.y;
+
+            // 1. Draw Principal Axis and Mirror
+            drawLine(0, center.y, w, center.y, '#9ca3af');
+            ctx.beginPath();
+            ctx.arc(center.x - (focalLength * 2.5), center.y, focalLength * 3, 1.75 * Math.PI, 0.25 * Math.PI);
+            ctx.strokeStyle = '#1f2937';
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            
+            // 2. Draw F and C points
+            ctx.fillStyle = '#1f2937';
+            ctx.beginPath();
+            ctx.arc(F.x, F.y, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillText('F', F.x - 5, F.y + 20);
+            ctx.beginPath();
+            ctx.arc(C.x, C.y, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillText('C', C.x - 5, C.y + 20);
+
+            // 3. Draw Object (Candle)
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillRect(object.x - 5, object.y - object.height, 10, object.height);
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.moveTo(object.x, object.y - object.height - 10);
+            ctx.lineTo(object.x - 5, object.y - object.height);
+            ctx.lineTo(object.x + 5, object.y - object.height);
+            ctx.closePath();
+            ctx.fill();
+
+            // 4. Ray Tracing
+            const objectTop = { x: object.x, y: object.y - object.height };
+            
+            // Mirror formula: 1/f = 1/v + 1/u (f is positive for convex)
+            const u = object.x - center.x; // object distance (will be negative)
+            const f = focalLength;
+            const v = 1 / (1/f - 1/u); // image distance
+            const magnification = -v / u;
+            const imageHeight = object.height * magnification;
+            const imageX = center.x + v;
+            
+            const mirrorIntersectionY = object.y - object.height;
+            
+            // Ray 1: Parallel -> reflects as if from Focus
+            drawLine(objectTop.x, objectTop.y, center.x, mirrorIntersectionY, '#ef4444');
+            const slope1 = (mirrorIntersectionY - F.y) / (center.x - F.x);
+            const reflectX1 = 0;
+            const reflectY1 = mirrorIntersectionY - slope1 * (center.x - reflectX1);
+            drawLine(center.x, mirrorIntersectionY, reflectX1, reflectY1, '#ef4444');
+            drawLine(center.x, mirrorIntersectionY, F.x, F.y, 'rgba(239, 68, 68, 0.5)', true); // Dashed line to F
+            
+            // Ray 2: Aims for C -> reflects back on itself
+            drawLine(objectTop.x, objectTop.y, C.x, C.y, '#22c55e');
+            const slope2 = (C.y - objectTop.y) / (C.x - objectTop.x);
+            const reflectX2 = 0;
+            const reflectY2 = objectTop.y - slope2 * (objectTop.x - reflectX2);
+            drawLine(objectTop.x, objectTop.y, reflectX2, reflectY2, '#22c55e');
+
+
+            // 5. Draw Image (always virtual for convex)
+            ctx.fillStyle = 'rgba(245, 159, 11, 0.7)';
+            ctx.fillRect(imageX - 4, center.y - imageHeight, 8, imageHeight);
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.7)';
+             ctx.beginPath();
+            ctx.moveTo(imageX, center.y - imageHeight - 8);
+            ctx.lineTo(imageX - 4, center.y - imageHeight);
+            ctx.lineTo(imageX + 4, center.y - imageHeight);
+            ctx.closePath();
+            ctx.fill();
+
+            // 6. Update Info Panel
+            let info = '';
+            info += `<p>Position: ${Math.abs(u).toFixed(0)}</p>`;
+            info += `<p>Type: <span class="font-bold text-blue-600">Virtual</span></p>`;
+            info += `<p>Orientation: <span class="font-bold">Erect</span></p>`;
+            info += `<p>Size: <span class="font-bold">Diminished</span></p>`;
+            imageInfoEl.innerHTML = info;
+        }
+
+        function handleMouseDown(e) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            if (mouseX > object.x - 15 && mouseX < object.x + 15 && mouseY > object.y - object.height - 15 && mouseY < object.y) {
+                isDragging = true;
+            }
+        }
+        
+        function handleMouseMove(e) {
+            if (!isDragging) return;
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            object.x = Math.max(50, Math.min(center.x - 50, mouseX));
+            draw();
+        }
+
+        function handleMouseUp() {
+            isDragging = false;
+        }
+
+        canvas.addEventListener('mousedown', handleMouseDown);
+        canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('mouseup', handleMouseUp);
+        canvas.addEventListener('mouseout', handleMouseUp);
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // Initial setup
+        resizeCanvas();
+
+    </script>
+</body>
+</html>
