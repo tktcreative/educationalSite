@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electron Dot Structure Simulation - Interactive Science Lab</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* A very light gray */
+        }
+        canvas {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="py-12 px-4 md:px-8">
+
+    <!-- Main container -->
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 tracking-tight">
+                Electron Dot Structures
+            </h1>
+            <p class="text-lg text-gray-600 mt-3 max-w-3xl mx-auto">
+                Learn how to draw electron dot structures for simple covalent compounds.
+            </p>
+        </header>
+
+        <!-- Simulation Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Left Panel: Information -->
+            <div class="lg:col-span-1 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">What are Electron Dot Structures?</h2>
+                <p class="text-gray-600 mb-4">
+                    Also known as Lewis structures, they are diagrams that show the bonding between atoms of a molecule and the lone pairs of electrons that may exist in the molecule.
+                </p>
+                <p class="text-gray-600 mb-6">
+                    The goal is to arrange the electrons so that each atom (except Hydrogen) satisfies the <strong>octet rule</strong>, meaning it has eight valence electrons in its outer shell.
+                </p>
+                
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">How to Use:</h3>
+                 <ul class="list-disc list-inside text-gray-700 space-y-2 mb-6">
+                    <li>Select a molecule from the dropdown menu.</li>
+                    <li>Drag the valence electrons from the "Electron Pool" into the correct positions around the atoms.</li>
+                    <li>Share electrons between atoms to form covalent bonds.</li>
+                    <li>Click <strong>Check Structure</strong> to see if you are correct!</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Example: Water (H₂O)</h3>
+                <ol class="list-decimal list-inside text-gray-700 space-y-2">
+                    <li><strong>Count Electrons:</strong> Oxygen has 6 valence electrons and each Hydrogen has 1. Total = 6 + 1 + 1 = <strong>8 electrons</strong>.</li>
+                    <li><strong>Form Bonds:</strong> Drag two electrons to form a single bond between Oxygen and the first Hydrogen. Repeat for the second Hydrogen. (4 electrons used).</li>
+                    <li><strong>Place Lone Pairs:</strong> Drag the remaining 4 electrons and place them on the Oxygen atom as two "lone pairs". This completes Oxygen's octet.</li>
+                </ol>
+            </div>
+
+            <!-- Right Panel: Interactive Simulation -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                <div class="w-full h-[60vh] mb-4 relative">
+                    <canvas id="simulation-canvas" class="w-full h-full bg-gray-100 rounded-lg border"></canvas>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                    <div>
+                        <label for="molecule-select" class="font-semibold text-gray-700 mr-2">Select Molecule:</label>
+                        <select id="molecule-select" class="p-2 rounded-lg border-2">
+                            <option value="methane">Methane (CH₄)</option>
+                            <option value="water">Water (H₂O)</option>
+                            <option value="ammonia">Ammonia (NH₃)</option>
+                            <option value="carbonDioxide">Carbon Dioxide (CO₂)</option>
+                            <option value="nitrogen">Nitrogen (N₂)</option>
+                        </select>
+                    </div>
+                    <button id="check-btn" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">Check Structure</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Canvas and Context Setup ---
+        const canvas = document.getElementById('simulation-canvas');
+        const ctx = canvas.getContext('2d');
+        const moleculeSelect = document.getElementById('molecule-select');
+        const checkBtn = document.getElementById('check-btn');
+
+        let atoms = [];
+        let electrons = [];
+        let solution = [];
+        let message = '';
+        let draggingElectron = null;
+
+        const moleculesData = {
+            methane: {
+                atoms: [ { symbol: 'C', x: 0, y: 0, valence: 4 }, { symbol: 'H', x: 0, y: -100, valence: 1 }, { symbol: 'H', x: 100, y: 0, valence: 1 }, { symbol: 'H', x: 0, y: 100, valence: 1 }, { symbol: 'H', x: -100, y: 0, valence: 1 } ],
+                solution: [ { x: 0, y: -50 }, { x: 0, y: -50 }, { x: 50, y: 0 }, { x: 50, y: 0 }, { x: 0, y: 50 }, { x: 0, y: 50 }, { x: -50, y: 0 }, { x: -50, y: 0 } ]
+            },
+            water: {
+                atoms: [ { symbol: 'O', x: 0, y: 0, valence: 6 }, { symbol: 'H', x: -80, y: 60, valence: 1 }, { symbol: 'H', x: 80, y: 60, valence: 1 } ],
+                solution: [ { x: 0, y: -25 }, { x: 0, y: -25 }, { x: -25, y: -5 }, { x: 25, y: -5 }, { x: -40, y: 30 }, { x: -40, y: 30 }, { x: 40, y: 30 }, { x: 40, y: 30 } ]
+            },
+            ammonia: {
+                atoms: [ { symbol: 'N', x: 0, y: 0, valence: 5 }, { symbol: 'H', x: 0, y: -90, valence: 1 }, { symbol: 'H', x: 80, y: 45, valence: 1 }, { symbol: 'H', x: -80, y: 45, valence: 1 } ],
+                solution: [ { x: 0, y: 25 }, { x: 0, y: 25 }, { x: 0, y: -45 }, { x: 0, y: -45 }, { x: 40, y: 22.5 }, { x: 40, y: 22.5 }, { x: -40, y: 22.5 }, { x: -40, y: 22.5 } ]
+            },
+            carbonDioxide: {
+                atoms: [ { symbol: 'C', x: 0, y: 0, valence: 4 }, { symbol: 'O', x: -120, y: 0, valence: 6 }, { symbol: 'O', x: 120, y: 0, valence: 6 } ],
+                solution: [ 
+                    { x: -60, y: -10 }, { x: -60, y: -10 }, { x: -60, y: 10 }, { x: -60, y: 10 }, // Left double bond
+                    { x: 60, y: -10 }, { x: 60, y: -10 }, { x: 60, y: 10 }, { x: 60, y: 10 },   // Right double bond
+                    { x: -145, y: -10 }, { x: -145, y: -10 }, { x: -145, y: 10 }, { x: -145, y: 10 }, // Left O lone pairs
+                    { x: 145, y: -10 }, { x: 145, y: -10 }, { x: 145, y: 10 }, { x: 145, y: 10 }    // Right O lone pairs
+                ]
+            },
+            nitrogen: {
+                atoms: [ { symbol: 'N', x: -60, y: 0, valence: 5 }, { symbol: 'N', x: 60, y: 0, valence: 5 } ],
+                solution: [
+                    { x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: -20 }, { x: 0, y: -20 }, { x: 0, y: 20 }, { x: 0, y: 20 }, // Triple bond
+                    { x: -85, y: 0 }, { x: -85, y: 0 }, // Left N lone pair
+                    { x: 85, y: 0 }, { x: 85, y: 0 }    // Right N lone pair
+                ]
+            }
+        };
+
+        // --- Drawing Functions ---
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            drawScene();
+        }
+
+        function drawAtom(atom) {
+            ctx.font = 'bold 48px Inter, sans-serif';
+            ctx.fillStyle = '#374151';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(atom.symbol, atom.x, atom.y);
+        }
+
+        function drawElectron(electron) {
+            ctx.fillStyle = electron.isPlaced ? '#2563eb' : '#9ca3af';
+            ctx.beginPath();
+            ctx.arc(electron.x, electron.y, 6, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawElectronPool() {
+            ctx.strokeStyle = '#d1d5db';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(10, canvas.height - 60, canvas.width - 20, 50);
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '14px Inter, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('Electron Pool', 20, canvas.height - 45);
+        }
+
+        // --- Simulation Logic ---
+        function loadMolecule(name) {
+            const data = moleculesData[name];
+            atoms = data.atoms.map(a => ({ ...a, x: a.x + canvas.width / 2, y: a.y + canvas.height / 2 - 50 }));
+            solution = data.solution.map(p => ({ x: p.x + canvas.width / 2, y: p.y + canvas.height / 2 - 50 }));
+            
+            electrons = [];
+            const totalValence = data.atoms.reduce((sum, atom) => sum + atom.valence, 0);
+            for (let i = 0; i < totalValence; i++) {
+                electrons.push({
+                    x: 30 + i * 20,
+                    y: canvas.height - 25,
+                    isPlaced: false
+                });
+            }
+            message = '';
+            drawScene();
+        }
+        
+        function checkSolution() {
+            const snapThreshold = 25;
+            let correctCount = 0;
+            
+            const placedElectrons = electrons.filter(e => e.isPlaced);
+            if (placedElectrons.length !== solution.length) {
+                message = `You've placed ${placedElectrons.length} electrons, but ${solution.length} are needed.`;
+                drawScene();
+                return;
+            }
+
+            // Create a copy of the solution to "use up" points as they are matched
+            let solutionCopy = [...solution];
+
+            placedElectrons.forEach(e => {
+                let bestMatchIndex = -1;
+                let smallestDist = Infinity;
+
+                // Find the closest available solution point
+                solutionCopy.forEach((p, index) => {
+                    const dist = Math.sqrt(Math.pow(e.x - p.x, 2) + Math.pow(e.y - p.y, 2));
+                    if (dist < snapThreshold && dist < smallestDist) {
+                        smallestDist = dist;
+                        bestMatchIndex = index;
+                    }
+                });
+
+                if (bestMatchIndex !== -1) {
+                    correctCount++;
+                    // Remove the matched point so it can't be used again
+                    solutionCopy.splice(bestMatchIndex, 1);
+                }
+            });
+
+            if (correctCount === solution.length) {
+                message = 'Correct! Well done!';
+            } else {
+                message = `Not quite right. ${correctCount}/${solution.length} electrons are in a correct spot.`;
+            }
+            drawScene();
+        }
+
+        function drawScene() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawElectronPool();
+            atoms.forEach(drawAtom);
+            electrons.forEach(drawElectron);
+            
+            ctx.fillStyle = message.startsWith('Correct') ? '#16a34a' : '#dc2626';
+            ctx.font = 'bold 18px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(message, canvas.width / 2, 30);
+        }
+
+        // --- Event Handlers ---
+        function handleMouseDown(e) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            for (let i = electrons.length - 1; i >= 0; i--) {
+                const e = electrons[i];
+                const dist = Math.sqrt(Math.pow(mouseX - e.x, 2) + Math.pow(mouseY - e.y, 2));
+                if (dist < 10) {
+                    draggingElectron = e;
+                    message = ''; // Clear message when user starts a new action
+                    break;
+                }
+            }
+        }
+
+        function handleMouseMove(e) {
+            if (!draggingElectron) return;
+            const rect = canvas.getBoundingClientRect();
+            draggingElectron.x = e.clientX - rect.left;
+            draggingElectron.y = e.clientY - rect.top;
+            drawScene();
+        }
+
+        function handleMouseUp(e) {
+            if (!draggingElectron) return;
+
+            // Check if it's outside the pool
+            if (draggingElectron.y < canvas.height - 70) {
+                draggingElectron.isPlaced = true;
+            } else {
+                draggingElectron.isPlaced = false;
+            }
+            draggingElectron = null;
+            drawScene();
+        }
+
+        // --- Initial Setup ---
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            loadMolecule(moleculeSelect.value);
+        });
+        moleculeSelect.addEventListener('change', () => loadMolecule(moleculeSelect.value));
+        checkBtn.addEventListener('click', checkSolution);
+        canvas.addEventListener('mousedown', handleMouseDown);
+        canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('mouseup', handleMouseUp);
+
+        resizeCanvas();
+        loadMolecule(moleculeSelect.value);
+
+    </script>
+</body>
+</html>

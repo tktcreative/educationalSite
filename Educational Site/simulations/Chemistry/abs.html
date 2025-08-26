@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acids, Bases & pH Scale Simulation - Interactive Science Lab</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* A very light gray */
+        }
+        .test-item {
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .test-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        #ph-strip {
+            transition: background-color 0.5s;
+        }
+        #solution {
+             transition: background-color 0.5s, height 0.5s;
+        }
+    </style>
+</head>
+<body class="py-12 px-4 md:px-8">
+
+    <!-- Main container -->
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 tracking-tight">
+                Acids, Bases & pH Scale
+            </h1>
+            <p class="text-lg text-gray-600 mt-3 max-w-3xl mx-auto">
+                Test common household items to determine their pH and see how universal indicator paper changes color.
+            </p>
+        </header>
+
+        <!-- Simulation Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Left Panel: Information -->
+            <div class="lg:col-span-1 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Understanding pH</h2>
+                <p class="text-gray-600 mb-4">
+                    The pH scale measures how acidic or basic a substance is. The scale ranges from 0 to 14.
+                </p>
+                 <ul class="list-disc list-inside text-gray-700 space-y-2 mb-6">
+                    <li>A pH of <strong>less than 7</strong> indicates an <strong>acid</strong>.</li>
+                    <li>A pH of <strong>7</strong> is <strong>neutral</strong>.</li>
+                    <li>A pH of <strong>greater than 7</strong> indicates a <strong>base</strong> (or alkali).</li>
+                </ul>
+                
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">How to Use:</h3>
+                 <ul class="list-disc list-inside text-gray-700 space-y-2 mb-6">
+                    <li>Click on an item from the shelf (e.g., Lemon Juice, Soap).</li>
+                    <li>Watch as it's added to the beaker of pure water.</li>
+                    <li>Observe the color change of the solution and the pH strip.</li>
+                    <li>The pH meter will show you the exact pH value.</li>
+                    <li>Click <strong>Reset</strong> to test another item.</li>
+                </ul>
+            </div>
+
+            <!-- Right Panel: Interactive Simulation -->
+            <div class="lg:col-span-2 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <!-- Test Items Shelf -->
+                <div id="items-shelf" class="grid grid-cols-3 md:grid-cols-6 gap-4 mb-8 p-4 bg-gray-100 rounded-lg">
+                    <!-- Items will be generated here -->
+                </div>
+
+                <!-- Beaker and pH Meter -->
+                <div class="flex flex-col md:flex-row justify-around items-center h-80">
+                    <!-- Beaker -->
+                    <div class="w-48 h-64 border-2 border-gray-400 rounded-b-3xl relative">
+                        <div id="solution" class="absolute bottom-0 w-full h-1/2 bg-blue-100 rounded-b-3xl"></div>
+                    </div>
+                    <!-- pH Meter -->
+                    <div class="w-48 text-center">
+                        <h3 class="text-xl font-bold mb-2">pH Meter</h3>
+                        <div id="ph-strip" class="w-full h-16 bg-gray-200 rounded-lg mb-2 border-2 border-gray-300"></div>
+                        <div id="ph-value" class="text-4xl font-extrabold text-gray-700">7.0</div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-8">
+                    <button id="reset-btn" class="w-full md:w-1/2 bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-700 transition-colors">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const itemsShelf = document.getElementById('items-shelf');
+        const solutionDiv = document.getElementById('solution');
+        const phStrip = document.getElementById('ph-strip');
+        const phValue = document.getElementById('ph-value');
+        const resetBtn = document.getElementById('reset-btn');
+
+        const testItems = [
+            { name: 'Lemon Juice', pH: 2.2, color: 'bg-red-400', itemColor: 'bg-yellow-300' },
+            { name: 'Coffee', pH: 5.0, color: 'bg-yellow-500', itemColor: 'bg-yellow-800' },
+            { name: 'Milk', pH: 6.8, color: 'bg-yellow-300', itemColor: 'bg-white' },
+            { name: 'Baking Soda', pH: 9.0, color: 'bg-teal-400', itemColor: 'bg-gray-200' },
+            { name: 'Soap', pH: 10.0, color: 'bg-blue-500', itemColor: 'bg-pink-300' },
+            { name: 'Drain Cleaner', pH: 13.5, color: 'bg-purple-600', itemColor: 'bg-gray-500' }
+        ];
+
+        function getPhColor(pH) {
+            if (pH < 3) return 'bg-red-500';
+            if (pH < 5) return 'bg-orange-500';
+            if (pH < 6.5) return 'bg-yellow-500';
+            if (pH < 7.5) return 'bg-green-500';
+            if (pH < 9) return 'bg-teal-500';
+            if (pH < 11) return 'bg-blue-500';
+            return 'bg-purple-600';
+        }
+
+        function createTestItems() {
+            itemsShelf.innerHTML = '';
+            testItems.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.classList.add('test-item', 'p-2', 'rounded-lg', 'text-center', 'border', 'shadow-sm', item.itemColor);
+                itemDiv.textContent = item.name;
+                itemDiv.addEventListener('click', () => testItem(item));
+                itemsShelf.appendChild(itemDiv);
+            });
+        }
+
+        function testItem(item) {
+            // Disable buttons during animation
+            document.querySelectorAll('.test-item').forEach(el => el.style.pointerEvents = 'none');
+            
+            // 1. Update pH meter
+            const newColorClass = getPhColor(item.pH);
+            phStrip.className = `w-full h-16 rounded-lg mb-2 border-2 border-gray-300 ${newColorClass}`;
+            phValue.textContent = item.pH.toFixed(1);
+
+            // 2. Animate solution
+            solutionDiv.classList.remove('bg-blue-100');
+            solutionDiv.classList.add(newColorClass, 'opacity-50');
+            solutionDiv.style.height = '55%'; // Slightly increase level
+        }
+
+        function reset() {
+            phStrip.className = 'w-full h-16 bg-gray-200 rounded-lg mb-2 border-2 border-gray-300';
+            phValue.textContent = '7.0';
+            
+            // Remove all color classes before adding the neutral one
+            const colorClasses = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500', 'bg-teal-500', 'bg-blue-500', 'bg-purple-600', 'opacity-50'];
+            solutionDiv.classList.remove(...colorClasses);
+            solutionDiv.classList.add('bg-blue-100');
+            solutionDiv.style.height = '50%';
+            
+            document.querySelectorAll('.test-item').forEach(el => el.style.pointerEvents = 'auto');
+        }
+
+        resetBtn.addEventListener('click', reset);
+
+        // Initial setup
+        createTestItems();
+
+    </script>
+</body>
+</html>

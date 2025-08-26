@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose a Subject - Interactive Science Lab</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* A very light gray */
+        }
+        .subject-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            overflow: hidden; /* Ensures the image corners are rounded */
+        }
+        .subject-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="py-12 px-4 md:px-8">
+
+    <!-- Main container -->
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 tracking-tight">
+                Choose a Subject
+            </h1>
+            <p class="text-lg text-gray-600 mt-3 max-w-2xl mx-auto">
+                Select a subject to begin exploring the interactive simulations for Class 10.
+            </p>
+        </header>
+
+        <!-- Grid for Subject Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <!-- Physics Card -->
+            <div class="subject-card bg-white rounded-xl shadow-lg border border-gray-200 flex flex-col">
+                <img src="physics.jpg" 
+                     alt="Physics concept illustration" 
+                     class="w-full h-48 object-cover"
+                     onerror="this.onerror=null;this.src='https://placehold.co/600x400/3b82f6/ffffff?text=Physics';">
+                <div class="p-6 flex flex-col flex-grow">
+                    <h2 class="text-3xl font-bold text-blue-600 mb-3">Physics</h2>
+                    <p class="text-gray-600 mb-6 flex-grow">
+                        Explore the principles of light, electricity, and magnetism through interactive experiments.
+                    </p>
+                    <a href="physics_topics.html" class="mt-4 block text-center w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                        Explore Physics
+                    </a>
+                </div>
+            </div>
+
+            <!-- Chemistry Card -->
+            <div class="subject-card bg-white rounded-xl shadow-lg border border-gray-200 flex flex-col">
+                <img src="https://images.unsplash.com/photo-1554475901-4538ddfbccc2?auto=format&fit=crop&q=80&w=800" 
+                     alt="Chemistry concept illustration" 
+                     class="w-full h-48 object-cover"
+                     onerror="this.onerror=null;this.src='https://placehold.co/600x400/22c55e/ffffff?text=Chemistry';">
+                <div class="p-6 flex flex-col flex-grow">
+                    <h2 class="text-3xl font-bold text-green-600 mb-3">Chemistry</h2>
+                    <p class="text-gray-600 mb-6 flex-grow">
+                        Dive into the world of atoms, reactions, and molecules. Experiment with chemical equations and more.
+                    </p>
+                    <a href="chemistry_topics.html" class="mt-4 block text-center w-full bg-green-600 text-white font-semibold py-3 rounded-lg hover:bg-green-700 transition-colors">
+                        Explore Chemistry
+                    </a>
+                </div>
+            </div>
+
+            <!-- Biology Card -->
+            <div class="subject-card bg-white rounded-xl shadow-lg border border-gray-200 flex flex-col">
+                <!-- UPDATED IMAGE LINK -->
+                <img src="https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&q=80&w=800" 
+                     alt="Biology concept illustration of plant cells" 
+                     class="w-full h-48 object-cover"
+                     onerror="this.onerror=null;this.src='https://placehold.co/600x400/a855f7/ffffff?text=Biology';">
+                <div class="p-6 flex flex-col flex-grow">
+                    <h2 class="text-3xl font-bold text-purple-600 mb-3">Biology</h2>
+                    <p class="text-gray-600 mb-6 flex-grow">
+                        Uncover the secrets of life processes, from the human body to the principles of genetics.
+                    </p>
+                     <a href="biology_topics.html" class="mt-4 block text-center w-full bg-purple-600 text-white font-semibold py-3 rounded-lg hover:bg-purple-700 transition-colors">
+                        Explore Biology
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

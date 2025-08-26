@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Types of Chemical Reactions - Interactive Science Lab</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* A very light gray */
+        }
+        .reaction-btn.active {
+            background-color: #2563eb;
+            color: white;
+        }
+    </style>
+</head>
+<body class="py-12 px-4 md:px-8">
+
+    <!-- Main container -->
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 tracking-tight">
+                Types of Chemical Reactions
+            </h1>
+            <p class="text-lg text-gray-600 mt-3 max-w-3xl mx-auto">
+                Combine reactants to see examples of Combination, Decomposition, and Displacement reactions.
+            </p>
+        </header>
+
+        <!-- Simulation Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Left Panel: Information -->
+            <div class="lg-col-span-1 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Reaction Types</h2>
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="font-semibold text-lg">Combination Reaction</h3>
+                        <p class="text-gray-600">Hydrogen and Oxygen combine to form a single product, Water.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg">Decomposition Reaction</h3>
+                        <p class="text-gray-600">Hydrogen Peroxide breaks down into two simpler substances, Water and Oxygen.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-lg">Displacement Reaction</h3>
+                        <p class="text-gray-600">The more reactive Zinc displaces the less reactive Copper from Copper Sulfate solution.</p>
+                    </div>
+                </div>
+                
+                <h3 class="text-xl font-semibold text-gray-800 mt-8 mb-3">How to Use:</h3>
+                 <ul class="list-disc list-inside text-gray-700 space-y-2 mb-6">
+                    <li>Select a reaction type from the buttons above the animation.</li>
+                    <li>Click <strong>Start Reaction</strong> to see the molecules interact.</li>
+                    <li>Click <strong>Reset</strong> to try another reaction.</li>
+                </ul>
+            </div>
+
+            <!-- Right Panel: Interactive Simulation -->
+            <div class="lg:col-span-2 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <!-- Reaction Type Buttons -->
+                <div class="flex justify-center gap-2 mb-4">
+                    <button id="btn-combination" class="reaction-btn px-4 py-2 font-semibold rounded-lg border-2 border-gray-300">Combination</button>
+                    <button id="btn-decomposition" class="reaction-btn px-4 py-2 font-semibold rounded-lg border-2 border-gray-300">Decomposition</button>
+                    <button id="btn-displacement" class="reaction-btn px-4 py-2 font-semibold rounded-lg border-2 border-gray-300">Displacement</button>
+                </div>
+
+                <!-- Canvas -->
+                <div class="w-full h-[50vh] mb-4 relative">
+                    <canvas id="simulation-canvas" class="w-full h-full bg-gray-100 rounded-lg border"></canvas>
+                </div>
+                
+                <!-- Equation and Controls -->
+                <div class="text-center">
+                     <p id="equation" class="text-2xl font-bold h-8 mb-4"></p>
+                    <div class="flex justify-center gap-4">
+                        <button id="start-btn" class="w-1/2 bg-green-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors">Start Reaction</button>
+                        <button id="reset-btn" class="w-1/2 bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-700 transition-colors">Reset</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simulation-canvas');
+        const ctx = canvas.getContext('2d');
+        const startBtn = document.getElementById('start-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const equationEl = document.getElementById('equation');
+        const reactionButtons = document.querySelectorAll('.reaction-btn');
+
+        let molecules = [];
+        let animationFrameId;
+        let reactionState = 'initial'; // initial, reacting, finished
+        let currentReactionType = 'combination';
+        let animationProgress = 0;
+        const animationSpeed = 0.005; // Slower speed
+
+        const ATOM_COLORS = { H: '#e2e8f0', O: '#ef4444', Zn: '#71717a', Cu: '#f59e0b', S: '#a1a1aa' };
+
+        // --- Molecule Drawing Primitives ---
+        const drawBond = (x1, y1, x2, y2) => {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+        };
+
+        const drawAtom = (x, y, radius, color) => {
+            // Create a gradient for a 3D effect
+            const gradient = ctx.createRadialGradient(x - radius * 0.2, y - radius * 0.2, radius * 0.1, x, y, radius);
+            gradient.addColorStop(0, 'white');
+            gradient.addColorStop(1, color);
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+        };
+
+        const drawLabel = (text, x, y, color = '#1f2937') => {
+            ctx.fillStyle = color;
+            ctx.font = 'bold 14px Inter';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, x, y);
+        };
+        
+        // --- Animation Utility Functions ---
+        const lerp = (start, end, amt) => (1 - amt) * start + amt * end;
+        // Easing function for smooth start and end
+        const easeInOutCubic = t => t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+
+
+        // --- Molecule Definitions ---
+        const moleculeShapes = {
+            'H2': (x, y) => {
+                drawBond(x - 10, y, x + 10, y);
+                drawAtom(x - 10, y, 10, ATOM_COLORS.H);
+                drawAtom(x + 10, y, 10, ATOM_COLORS.H);
+                drawLabel('H₂', x, y);
+            },
+            'O2': (x, y) => {
+                drawBond(x - 15, y, x + 15, y);
+                drawAtom(x - 15, y, 15, ATOM_COLORS.O);
+                drawAtom(x + 15, y, 15, ATOM_COLORS.O);
+                drawLabel('O₂', x, y, 'white');
+            },
+            'H2O': (x, y) => {
+                drawBond(x, y, x - 15, y + 15);
+                drawBond(x, y, x + 15, y + 15);
+                drawAtom(x, y, 15, ATOM_COLORS.O);
+                drawAtom(x - 15, y + 15, 10, ATOM_COLORS.H);
+                drawAtom(x + 15, y + 15, 10, ATOM_COLORS.H);
+                drawLabel('H₂O', x, y, 'white');
+            },
+            'H2O2': (x, y) => {
+                drawBond(x - 15, y, x + 15, y);
+                drawBond(x - 15, y, x - 25, y + 15);
+                drawBond(x + 15, y, x + 25, y + 15);
+                drawAtom(x - 15, y, 15, ATOM_COLORS.O);
+                drawAtom(x + 15, y, 15, ATOM_COLORS.O);
+                drawAtom(x - 25, y + 15, 10, ATOM_COLORS.H);
+                drawAtom(x + 25, y + 15, 10, ATOM_COLORS.H);
+                drawLabel('H₂O₂', x, y, 'white');
+            },
+            'Zn': (x, y) => {
+                drawAtom(x, y, 20, ATOM_COLORS.Zn);
+                drawLabel('Zn', x, y, 'white');
+            },
+            'Cu': (x, y) => {
+                drawAtom(x, y, 20, ATOM_COLORS.Cu);
+                drawLabel('Cu', x, y, 'white');
+            },
+            'CuSO4': (x, y) => {
+                drawAtom(x, y, 20, ATOM_COLORS.Cu);
+                drawAtom(x + 45, y, 30, ATOM_COLORS.S);
+                drawBond(x, y, x + 45, y);
+                drawLabel('CuSO₄', x + 30, y - 35);
+            },
+             'ZnSO4': (x, y) => {
+                drawAtom(x, y, 20, ATOM_COLORS.Zn);
+                drawAtom(x + 45, y, 30, ATOM_COLORS.S);
+                drawBond(x, y, x + 45, y);
+                drawLabel('ZnSO₄', x + 30, y - 35);
+            }
+        };
+
+        const reactions = {
+            combination: {
+                equation: '2H₂ + O₂ &rarr; 2H₂O',
+                setup: (w, h) => [
+                    { type: 'H2', x: w * 0.2, y: h * 0.3, startPos: { x: w * 0.2, y: h * 0.3 }, endPos: { x: w * 0.45, y: h * 0.4 } },
+                    { type: 'H2', x: w * 0.2, y: h * 0.7, startPos: { x: w * 0.2, y: h * 0.7 }, endPos: { x: w * 0.45, y: h * 0.6 } },
+                    { type: 'O2', x: w * 0.8, y: h / 2, startPos: { x: w * 0.8, y: h / 2 }, endPos: { x: w * 0.55, y: h / 2 } }
+                ],
+                products: (w, h) => [
+                    { type: 'H2O', x: w * 0.5, y: h * 0.5, startPos: { x: w * 0.5, y: h * 0.5 }, endPos: { x: w * 0.3, y: h * 0.4 } },
+                    { type: 'H2O', x: w * 0.5, y: h * 0.5, startPos: { x: w * 0.5, y: h * 0.5 }, endPos: { x: w * 0.7, y: h * 0.6 } }
+                ]
+            },
+            decomposition: {
+                equation: '2H₂O₂ &rarr; 2H₂O + O₂',
+                setup: (w, h) => [
+                    { type: 'H2O2', x: w * 0.3, y: h / 2, startPos: { x: w * 0.3, y: h / 2 }, endPos: { x: w * 0.45, y: h / 2 } },
+                    { type: 'H2O2', x: w * 0.7, y: h / 2, startPos: { x: w * 0.7, y: h / 2 }, endPos: { x: w * 0.55, y: h / 2 } }
+                ],
+                products: (w, h) => [
+                    { type: 'H2O', x: w * 0.5, y: h / 2, startPos: { x: w * 0.5, y: h / 2 }, endPos: { x: w * 0.2, y: h * 0.3 } },
+                    { type: 'H2O', x: w * 0.5, y: h / 2, startPos: { x: w * 0.5, y: h / 2 }, endPos: { x: w * 0.2, y: h * 0.7 } },
+                    { type: 'O2', x: w * 0.5, y: h / 2, startPos: { x: w * 0.5, y: h / 2 }, endPos: { x: w * 0.8, y: h / 2 } }
+                ]
+            },
+            displacement: {
+                equation: 'Zn + CuSO₄ &rarr; ZnSO₄ + Cu',
+                setup: (w, h) => [
+                    { type: 'Zn', x: w * 0.2, y: h / 2, startPos: { x: w * 0.2, y: h / 2 }, endPos: { x: w * 0.5, y: h / 2 } },
+                    { type: 'CuSO4', x: w * 0.7, y: h / 2, startPos: { x: w * 0.7, y: h / 2 }, endPos: { x: w * 0.5, y: h / 2 } }
+                ],
+                products: (w, h) => [
+                    { type: 'ZnSO4', x: w * 0.5, y: h / 2, startPos: { x: w * 0.5, y: h / 2 }, endPos: { x: w * 0.3, y: h / 2 } },
+                    { type: 'Cu', x: w * 0.5, y: h / 2, startPos: { x: w * 0.5, y: h / 2 }, endPos: { x: w * 0.8, y: h / 2 } }
+                ]
+            }
+        };
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
+            resetSimulation();
+        }
+
+        function drawScene() {
+            const w = canvas.width / (window.devicePixelRatio || 1);
+            const h = canvas.height / (window.devicePixelRatio || 1);
+            
+            ctx.clearRect(0, 0, w, h);
+            ctx.strokeStyle = '#1f2937';
+            ctx.lineWidth = 4;
+            molecules.forEach(m => moleculeShapes[m.type](m.x, m.y));
+        }
+
+        function gameLoop() {
+            if (reactionState === 'reacting') {
+                animationProgress += animationSpeed;
+
+                if (animationProgress < 0.5) { // Phase 1: Reactants move to center
+                    const phaseProgress = animationProgress * 2;
+                    const easedProgress = easeInOutCubic(phaseProgress);
+                    molecules.forEach(m => {
+                        m.x = lerp(m.startPos.x, m.endPos.x, easedProgress);
+                        m.y = lerp(m.startPos.y, m.endPos.y, easedProgress);
+                    });
+                } else if (!molecules[0].isProduct) { // Phase 2: Transform and products move out
+                    const w = canvas.width / (window.devicePixelRatio || 1);
+                    const h = canvas.height / (window.devicePixelRatio || 1);
+                    molecules = reactions[currentReactionType].products(w, h);
+                    molecules.forEach(m => m.isProduct = true); // Mark as product to prevent re-creation
+                }
+                
+                if (animationProgress >= 0.5) {
+                    const phaseProgress = (animationProgress - 0.5) * 2;
+                    const easedProgress = easeInOutCubic(phaseProgress);
+                     molecules.forEach(m => {
+                        m.x = lerp(m.startPos.x, m.endPos.x, easedProgress);
+                        m.y = lerp(m.startPos.y, m.endPos.y, easedProgress);
+                    });
+                }
+
+                if (animationProgress >= 1) {
+                    animationProgress = 1;
+                    reactionState = 'finished';
+                }
+            }
+            drawScene();
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function resetSimulation() {
+            reactionState = 'initial';
+            animationProgress = 0;
+            startBtn.disabled = false;
+            startBtn.classList.remove('opacity-50');
+            equationEl.innerHTML = reactions[currentReactionType].equation.replace(/(\d+)/g, '<sub>$1</sub>');
+            const w = canvas.width / (window.devicePixelRatio || 1);
+            const h = canvas.height / (window.devicePixelRatio || 1);
+            molecules = reactions[currentReactionType].setup(w, h);
+            drawScene();
+        }
+        
+        function selectReaction(type) {
+            currentReactionType = type;
+            reactionButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.id === `btn-${type}`) {
+                    btn.classList.add('active');
+                }
+            });
+            resetSimulation();
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (reactionState === 'initial') {
+                resetSimulation();
+                reactionState = 'reacting';
+                startBtn.disabled = true;
+                startBtn.classList.add('opacity-50');
+            }
+        });
+        resetBtn.addEventListener('click', resetSimulation);
+        reactionButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.id.split('-')[1];
+                selectReaction(type);
+            });
+        });
+        window.addEventListener('resize', resizeCanvas);
+
+        // Initial setup
+        resizeCanvas();
+        selectReaction('combination');
+        gameLoop();
+
+    </script>
+</body>
+</html>

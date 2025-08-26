@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physics Simulations - Interactive Science Lab</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* A very light gray */
+        }
+        .example-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .example-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="py-12 px-4 md:px-8">
+
+    <!-- Main container -->
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 tracking-tight">
+                Physics Simulations
+            </h1>
+            <p class="text-lg text-gray-600 mt-3 max-w-2xl mx-auto">
+                Choose a simulation to explore the principles of light, electricity, and magnetism.
+            </p>
+        </header>
+
+        <!-- Grid for Example Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <!-- Card 1: Ray Diagrams: Concave Mirror -->
+            <div class="example-card bg-white p-8 rounded-xl shadow-lg border border-gray-200 flex flex-col">
+                <div class="flex-grow">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-3">Ray Diagrams: Concave Mirror</h2>
+                    <p class="text-gray-600">Place an object at different positions to see how a concave mirror forms real and virtual images.</p>
+                </div>
+                <a href="#" class="mt-6 inline-flex items-center justify-center w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Play Simulation
+                </a>
+            </div>
+
+            <!-- Card 2: Ray Diagrams: Convex Lens -->
+            <div class="example-card bg-white p-8 rounded-xl shadow-lg border border-gray-200 flex flex-col">
+                <div class="flex-grow">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-3">Ray Diagrams: Convex Lens</h2>
+                    <p class="text-gray-600">See how a convex lens converges light to form images. Explore focal length and object distance.</p>
+                </div>
+                <a href="#" class="mt-6 inline-flex items-center justify-center w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Play Simulation
+                </a>
+            </div>
+
+            <!-- Card 3: Ohm's Law Verification -->
+            <div class="example-card bg-white p-8 rounded-xl shadow-lg border border-gray-200 flex flex-col">
+                <div class="flex-grow">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-3">Ohm's Law Verification</h2>
+                    <p class="text-gray-600">Adjust the voltage and resistance in a simple circuit to see the direct relationship with current (V=IR).</p>
+                </div>
+                <a href="#" class="mt-6 inline-flex items-center justify-center w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Play Simulation
+                </a>
+            </div>
+
+            <!-- Card 4: Resistors in Series & Parallel -->
+            <div class="example-card bg-white p-8 rounded-xl shadow-lg border border-gray-200 flex flex-col">
+                <div class="flex-grow">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-3">Resistors in Series & Parallel</h2>
+                    <p class="text-gray-600">Build circuits to understand how total resistance changes when resistors are in series vs. parallel.</p>
+                </div>
+                <a href="#" class="mt-6 inline-flex items-center justify-center w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Play Simulation
+                </a>
+            </div>
+
+            <!-- Card 5: Magnetic Field of a Solenoid -->
+            <div class="example-card bg-white p-8 rounded-xl shadow-lg border border-gray-200 flex flex-col">
+                <div class="flex-grow">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-3">Magnetic Field of a Solenoid</h2>
+                    <p class="text-gray-600">Change the current to see how it affects the strength and direction of the magnetic field inside a solenoid.</p>
+                </div>
+                <a href="#" class="mt-6 inline-flex items-center justify-center w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Play Simulation
+                </a>
+            </div>
+
+            <!-- Card 6: Dispersion through a Prism -->
+            <div class="example-card bg-white p-8 rounded-xl shadow-lg border border-gray-200 flex flex-col">
+                <div class="flex-grow">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-3">Dispersion through a Prism</h2>
+                    <p class="text-gray-600">Pass white light through a glass prism and observe the beautiful spectrum of seven colors.</p>
+                </div>
+                <a href="#" class="mt-6 inline-flex items-center justify-center w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Play Simulation
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saponification Simulation - Interactive Science Lab</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* A very light gray */
+        }
+    </style>
+</head>
+<body class="py-12 px-4 md:px-8">
+
+    <!-- Main container -->
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 tracking-tight">
+                Saponification: Making Soap
+            </h1>
+            <p class="text-lg text-gray-600 mt-3 max-w-3xl mx-auto">
+                An interactive look at the chemical reaction between a fat and a base to produce soap and glycerol.
+            </p>
+        </header>
+
+        <!-- Simulation Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Left Panel: Information -->
+            <div class="lg:col-span-1 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">What is Saponification?</h2>
+                <p class="text-gray-600 mb-4">
+                    Saponification is a process that involves the conversion of fat, oil, or lipid into soap and alcohol by the action of heat in the presence of aqueous alkali (e.g., NaOH).
+                </p>
+                <p class="text-gray-600 mb-6">
+                    In this reaction, a triglyceride (fat) reacts with a strong base like Sodium Hydroxide (NaOH) to form glycerol and fatty acid salts, which we call 'soap'.
+                </p>
+                
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">The Reactants:</h3>
+                <ul class="list-disc list-inside text-gray-700 space-y-2 mb-6">
+                    <li><strong>Triglyceride (Fat/Oil):</strong> A molecule made of a glycerol backbone and three fatty acid chains.</li>
+                    <li><strong>Sodium Hydroxide (NaOH):</strong> A strong base that breaks the ester bonds of the fat.</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">How to Use:</h3>
+                 <ul class="list-disc list-inside text-gray-700 space-y-2">
+                    <li>Use the sliders to adjust the number of reactions and the heat.</li>
+                    <li>Press <strong>Start Reaction</strong> to begin the animation.</li>
+                    <li>Press <strong>Reset</strong> to start over.</li>
+                </ul>
+            </div>
+
+            <!-- Right Panel: Interactive Simulation -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                <div class="w-full h-[60vh] mb-4 relative">
+                    <canvas id="simulation-canvas" class="w-full h-full bg-gray-100 rounded-lg border"></canvas>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                    <div class="flex gap-4">
+                        <button id="start-btn" class="w-full bg-green-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors">Start Reaction</button>
+                        <button id="reset-btn" class="w-full bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-700 transition-colors">Reset</button>
+                    </div>
+                    <div class="space-y-4">
+                         <div class="flex items-center gap-4">
+                            <label for="amount-slider" class="font-semibold text-gray-700 w-32">🧪 Reactions</label>
+                            <input type="range" id="amount-slider" min="1" max="4" value="1" class="w-full">
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <label for="heat-slider" class="font-semibold text-gray-700 w-32">🔥 Heat</label>
+                            <input type="range" id="heat-slider" min="1" max="5" value="1" class="w-full">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Canvas and Context Setup ---
+        const canvas = document.getElementById('simulation-canvas');
+        const ctx = canvas.getContext('2d');
+        const startBtn = document.getElementById('start-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const heatSlider = document.getElementById('heat-slider');
+        const amountSlider = document.getElementById('amount-slider');
+
+        let animationFrameId;
+        let molecules = [];
+        let reactionState = 'initial'; // 'initial', 'approaching', 'breaking', 'forming', 'finished'
+        let stateMessage = '';
+
+        // --- Drawing Functions ---
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+
+        function drawBeaker() {
+            ctx.strokeStyle = '#9ca3af';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(canvas.width * 0.1, canvas.height * 0.95);
+            ctx.lineTo(canvas.width * 0.15, canvas.height * 0.2);
+            ctx.lineTo(canvas.width * 0.85, canvas.height * 0.2);
+            ctx.lineTo(canvas.width * 0.9, canvas.height * 0.95);
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        function drawMolecule(m) {
+            // Draw bonds first
+            if (m.bonds) {
+                ctx.strokeStyle = '#6b7280';
+                ctx.lineWidth = 4;
+                m.bonds.forEach(bond => {
+                    ctx.beginPath();
+                    ctx.moveTo(m.x + bond.x1, m.y + bond.y1);
+                    ctx.lineTo(m.x + bond.x2, m.y + bond.y2);
+                    ctx.stroke();
+                });
+            }
+            // Draw atoms
+            if (m.atoms) {
+                m.atoms.forEach(atom => {
+                    ctx.fillStyle = atom.color;
+                    ctx.beginPath();
+                    ctx.arc(m.x + atom.x, m.y + atom.y, atom.r, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            }
+            // Draw label on the molecule
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 12px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(m.shortName, m.x, m.y);
+        }
+        
+        // --- Simulation Logic ---
+        function createMolecule(type, x, y) {
+            const base = { type, x, y, vx: (Math.random() - 0.5) * 2, vy: (Math.random() - 0.5) * 2 };
+            switch (type) {
+                case 'triglyceride':
+                    return { ...base, shortName: 'Fat', vx: (Math.random() - 0.5), vy: (Math.random() - 0.5),
+                        atoms: [ {x: 0, y: 0, r: 25, color: '#a855f7'}, {x: 0, y: -40, r: 15, color: '#facc15'}, {x: 40, y: 20, r: 15, color: '#facc15'}, {x: -40, y: 20, r: 15, color: '#facc15'} ],
+                        bonds: [ {x1: 0, y1: 0, x2: 0, y2: -40}, {x1: 0, y1: 0, x2: 40, y2: 20}, {x1: 0, y1: 0, x2: -40, y2: 20} ]
+                    };
+                case 'naoh':
+                    return { ...base, shortName: 'NaOH',
+                        atoms: [ {x: -10, y: 0, r: 10, color: '#ef4444'}, {x: 10, y: 0, r: 8, color: '#3b82f6'} ],
+                        bonds: [ {x1: -10, y1: 0, x2: 10, y2: 0} ]
+                    };
+                case 'glycerol':
+                     return { ...base, shortName: 'Glycerol',
+                        atoms: [ {x: 0, y: 0, r: 25, color: '#a855f7'}, {x: 0, y: -35, r: 8, color: '#3b82f6'}, {x: 35, y: 20, r: 8, color: '#3b82f6'}, {x: -35, y: 20, r: 8, color: '#3b82f6'} ],
+                        bonds: [ {x1: 0, y1: 0, x2: 0, y2: -35}, {x1: 0, y1: 0, x2: 35, y2: 20}, {x1: 0, y1: 0, x2: -35, y2: 20} ]
+                    };
+                case 'soap':
+                     return { ...base, shortName: 'Soap',
+                        atoms: [ {x: 0, y: 0, r: 15, color: '#facc15'}, {x: 20, y: 0, r: 10, color: '#ef4444'} ],
+                        bonds: [ {x1: 0, y1: 0, x2: 20, y2: 0} ]
+                    };
+            }
+        }
+
+        function createInitialMolecules() {
+            molecules = [];
+            const numReactions = parseInt(amountSlider.value);
+            for (let i = 0; i < numReactions; i++) {
+                const triglyceride = createMolecule('triglyceride', Math.random() * (canvas.width * 0.6) + (canvas.width * 0.2), Math.random() * (canvas.height * 0.6) + (canvas.height * 0.25));
+                triglyceride.id = `fat-${i}`;
+                molecules.push(triglyceride);
+
+                for (let j = 0; j < 3; j++) {
+                    const naoh = createMolecule('naoh', Math.random() * (canvas.width * 0.6) + (canvas.width * 0.2), Math.random() * (canvas.height * 0.6) + (canvas.height * 0.25));
+                    naoh.targetId = triglyceride.id;
+                    naoh.targetAtomIndex = j + 1;
+                    molecules.push(naoh);
+                }
+            }
+        }
+
+        function updateMolecules() {
+            const speed = parseFloat(heatSlider.value);
+            
+            if (reactionState === 'approaching') {
+                let allReached = true;
+                molecules.filter(m => m.type === 'naoh').forEach(naoh => {
+                    const targetFat = molecules.find(m => m.id === naoh.targetId);
+                    if (!targetFat) return;
+
+                    const targetAtom = targetFat.atoms[naoh.targetAtomIndex];
+                    const targetX = targetFat.x + targetAtom.x;
+                    const targetY = targetFat.y + targetAtom.y;
+
+                    const dx = targetX - naoh.x;
+                    const dy = targetY - naoh.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist > 30) {
+                        allReached = false;
+                        naoh.x += (dx / dist) * speed;
+                        naoh.y += (dy / dist) * speed;
+                    }
+                });
+
+                if (allReached) {
+                    reactionState = 'breaking';
+                    stateMessage = 'The base breaks the ester bonds connecting the fatty acids.';
+                    setTimeout(() => {
+                        molecules.filter(m => m.type === 'triglyceride').forEach(fat => fat.bonds = []);
+                        reactionState = 'forming';
+                        stateMessage = 'New bonds form, creating Glycerol and Soap molecules.';
+                        setTimeout(finishReaction, 1500);
+                    }, 1500);
+                }
+            }
+            
+            // General movement for all states except 'approaching' for NaOH
+            molecules.forEach(m => {
+                if (m.type === 'naoh' && reactionState === 'approaching') return;
+                
+                m.x += m.vx * speed * 0.5;
+                m.y += m.vy * speed * 0.5;
+                const radius = m.atoms[0].r;
+                if (m.x < canvas.width * 0.15 + radius || m.x > canvas.width * 0.85 - radius) m.vx *= -1;
+                if (m.y < canvas.height * 0.2 + radius || m.y > canvas.height * 0.95 - radius) m.vy *= -1;
+            });
+        }
+        
+        function finishReaction() {
+            const oldFats = molecules.filter(m => m.type === 'triglyceride');
+            const newMolecules = [];
+
+            oldFats.forEach(fat => {
+                newMolecules.push(createMolecule('glycerol', fat.x, fat.y));
+                for (let i = 0; i < 3; i++) {
+                    newMolecules.push(createMolecule('soap', fat.x + (Math.random() - 0.5) * 150, fat.y + (Math.random() - 0.5) * 150));
+                }
+            });
+            
+            molecules = newMolecules;
+            reactionState = 'finished';
+            stateMessage = 'The reaction is complete!';
+        }
+
+        function drawScene() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawBeaker();
+            molecules.forEach(drawMolecule);
+            
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+            ctx.font = 'bold 18px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(stateMessage, canvas.width / 2, canvas.height * 0.15);
+        }
+
+        function animate() {
+            updateMolecules();
+            drawScene();
+            animationFrameId = requestAnimationFrame(animate);
+        }
+
+        // --- Event Handlers ---
+        function startSimulation() {
+            if (reactionState === 'initial') {
+                reactionState = 'approaching';
+                stateMessage = 'The NaOH molecules approach the fat molecules...';
+                startBtn.disabled = true;
+                startBtn.classList.add('opacity-50');
+                amountSlider.disabled = true;
+            }
+        }
+
+        function resetSimulation() {
+            cancelAnimationFrame(animationFrameId);
+            reactionState = 'initial';
+            stateMessage = 'Reactants: Triglyceride (Fat) and Sodium Hydroxide (NaOH)';
+            startBtn.disabled = false;
+            startBtn.classList.remove('opacity-50');
+            amountSlider.disabled = false;
+            heatSlider.value = 1;
+            createInitialMolecules();
+            animate(); 
+        }
+        
+        // --- Initial Setup ---
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            resetSimulation();
+        });
+        startBtn.addEventListener('click', startSimulation);
+        resetBtn.addEventListener('click', resetSimulation);
+        amountSlider.addEventListener('input', resetSimulation);
+
+        resizeCanvas();
+        resetSimulation();
+
+    </script>
+</body>
+</html>
