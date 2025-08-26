@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circle Theorems - Interactive Science Lab</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* A very light gray */
+        }
+        canvas {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="py-12 px-4 md:px-8">
+
+    <!-- Main container -->
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 tracking-tight">
+                Circle Theorems
+            </h1>
+            <p class="text-lg text-gray-600 mt-3 max-w-3xl mx-auto">
+                Visualize theorems like "angle at the center is double the angle at the circumference" by dragging points on a circle.
+            </p>
+        </header>
+
+        <!-- Simulation Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Left Panel: Information & Controls -->
+            <div class="lg:col-span-1 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">The Theorem</h2>
+                <p class="text-gray-600 mb-6">
+                   The angle subtended by an arc at the center of a circle is double the angle subtended by it at any point on the remaining part of the circle.
+                </p>
+                
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">How to Use:</h3>
+                 <ul class="list-disc list-inside text-gray-700 space-y-2 mb-6">
+                    <li>The points <strong>A</strong> and <strong>B</strong> define an arc on the circle.</li>
+                    <li>Click and drag the point <strong>P</strong> anywhere along the major arc.</li>
+                    <li>Observe the relationship between the two angles in the calculations panel.</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Calculations:</h3>
+                <div class="space-y-2 text-lg font-mono bg-gray-50 p-4 rounded">
+                    <p>Angle at Center (∠AOB): <span id="calc-center" class="font-bold"></span></p>
+                    <p>Angle at Circumference (∠APB): <span id="calc-circumference" class="font-bold"></span></p>
+                    <hr class="my-2">
+                    <p id="relationship-text"></p>
+                </div>
+            </div>
+
+            <!-- Right Panel: Interactive Simulation -->
+            <div class="lg:col-span-2 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <div class="w-full h-[60vh] relative">
+                    <canvas id="simulation-canvas" class="w-full h-full bg-white rounded-lg border"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simulation-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        const calcCenter = document.getElementById('calc-center');
+        const calcCircumference = document.getElementById('calc-circumference');
+        const relationshipText = document.getElementById('relationship-text');
+
+        let center = { x: 0, y: 0 };
+        let radius = 150;
+        
+        // Angles in radians for points A, B, and P
+        let angleA = -Math.PI / 3;
+        let angleB = Math.PI / 3;
+        let angleP = -Math.PI * 0.8;
+
+        let pointA, pointB, pointP;
+        let isDragging = false;
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
+            
+            center.x = rect.width / 2;
+            center.y = rect.height / 2;
+            
+            draw();
+        }
+        
+        function getAngle(p1, p2, p3) {
+            const a = Math.hypot(p2.x - p3.x, p2.y - p3.y);
+            const b = Math.hypot(p1.x - p3.x, p1.y - p3.y);
+            const c = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+            const angleRad = Math.acos((a*a + b*b - c*c) / (2 * a * b));
+            return angleRad * (180 / Math.PI);
+        }
+
+        function draw() {
+            const w = canvas.width / (window.devicePixelRatio || 1);
+            const h = canvas.height / (window.devicePixelRatio || 1);
+            ctx.clearRect(0, 0, w, h);
+
+            pointA = { x: center.x + radius * Math.cos(angleA), y: center.y + radius * Math.sin(angleA) };
+            pointB = { x: center.x + radius * Math.cos(angleB), y: center.y + radius * Math.sin(angleB) };
+            pointP = { x: center.x + radius * Math.cos(angleP), y: center.y + radius * Math.sin(angleP) };
+            
+            // Draw circle
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, radius, 0, Math.PI * 2);
+            ctx.strokeStyle = '#9ca3af';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Draw lines for angles
+            ctx.strokeStyle = '#1d4ed8'; // Blue for center angle
+            ctx.beginPath();
+            ctx.moveTo(pointA.x, pointA.y);
+            ctx.lineTo(center.x, center.y);
+            ctx.lineTo(pointB.x, pointB.y);
+            ctx.stroke();
+            
+            ctx.strokeStyle = '#be123c'; // Red for circumference angle
+            ctx.beginPath();
+            ctx.moveTo(pointA.x, pointA.y);
+            ctx.lineTo(pointP.x, pointP.y);
+            ctx.lineTo(pointB.x, pointB.y);
+            ctx.stroke();
+            
+            // Draw points
+            [pointA, pointB, pointP, center].forEach(p => {
+                ctx.fillStyle = '#1f2937';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Draw labels
+            ctx.font = 'bold 16px Inter';
+            ctx.fillText('A', pointA.x + 15, pointA.y);
+            ctx.fillText('B', pointB.x + 15, pointB.y);
+            ctx.fillText('P', pointP.x - 15, pointP.y);
+            ctx.fillText('O', center.x - 15, center.y);
+            
+            updateCalculations();
+        }
+        
+        function updateCalculations() {
+            const angleCenter = getAngle(pointA, pointB, center);
+            const angleCircumference = getAngle(pointA, pointB, pointP);
+
+            calcCenter.textContent = `${angleCenter.toFixed(1)}°`;
+            calcCircumference.textContent = `${angleCircumference.toFixed(1)}°`;
+            relationshipText.textContent = `${angleCenter.toFixed(1)}° ≈ 2 * ${angleCircumference.toFixed(1)}°`;
+        }
+
+        function handleMouseDown(e) {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            const dist = Math.hypot(mouseX - pointP.x, mouseY - pointP.y);
+            if (dist < 15) {
+                isDragging = true;
+            }
+        }
+        
+        function handleMouseMove(e) {
+            if (!isDragging) return;
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            // Calculate new angle for P based on mouse position
+            angleP = Math.atan2(mouseY - center.y, mouseX - center.x);
+            
+            // Constrain P to the major arc
+            if (angleP > angleA && angleP < angleB) {
+                if (Math.abs(angleP - angleA) < Math.abs(angleP - angleB)) {
+                    angleP = angleA - 0.01;
+                } else {
+                    angleP = angleB + 0.01;
+                }
+            }
+            
+            draw();
+        }
+
+        function handleMouseUp() {
+            isDragging = false;
+        }
+
+        canvas.addEventListener('mousedown', handleMouseDown);
+        canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('mouseup', handleMouseUp);
+        canvas.addEventListener('mouseout', handleMouseUp);
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // Initial setup
+        resizeCanvas();
+
+    </script>
+</body>
+</html>

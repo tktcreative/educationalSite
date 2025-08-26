@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probability Explorer - Interactive Science Lab</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* A very light gray */
+        }
+        .tab-btn.active {
+            background-color: #1d4ed8;
+            color: white;
+            border-color: #1d4ed8;
+        }
+        .result-table td, .result-table th {
+            padding: 8px 12px;
+            text-align: center;
+        }
+        .visual-area {
+            transition: transform 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="py-12 px-4 md:px-8">
+
+    <!-- Main container -->
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 tracking-tight">
+                Probability Explorer
+            </h1>
+            <p class="text-lg text-gray-600 mt-3 max-w-3xl mx-auto">
+                Roll dice, flip coins, and draw cards to see experimental probability approach theoretical probability.
+            </p>
+        </header>
+
+        <!-- Simulation Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Left Panel: Information -->
+            <div class="lg:col-span-1 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Theoretical vs. Experimental</h2>
+                <p class="text-gray-600 mb-4">
+                   <strong>Theoretical Probability</strong> is what we expect to happen based on math. For a fair coin, the theoretical probability of getting heads is 1/2 or 50%.
+                </p>
+                <p class="text-gray-600 mb-6">
+                   <strong>Experimental Probability</strong> is what actually happens when we run an experiment. If you flip a coin 10 times, you might get 6 heads (60%), not exactly 5.
+                </p>
+                <p class="text-gray-600">
+                   As you increase the number of trials, you'll see the experimental probability get closer and closer to the theoretical probability!
+                </p>
+            </div>
+
+            <!-- Right Panel: Interactive Simulation -->
+            <div class="lg:col-span-2 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <!-- Tabs -->
+                <div class="flex justify-center border-b mb-6">
+                    <button id="tab-coin" class="tab-btn active px-6 py-2 font-semibold border-b-4">Coin Flip</button>
+                    <button id="tab-die" class="tab-btn px-6 py-2 font-semibold border-b-4 border-transparent">Die Roll</button>
+                    <button id="tab-card" class="tab-btn px-6 py-2 font-semibold border-b-4 border-transparent">Card Draw</button>
+                </div>
+
+                <!-- Content Area -->
+                <div id="content-area">
+                    <!-- Coin Flip Sim -->
+                    <div id="sim-coin">
+                        <div class="visual-area h-32 flex items-center justify-center">
+                            <img id="coin-img" src="https://placehold.co/100x100/facc15/ffffff?text=Heads" class="h-24 w-24 rounded-full">
+                        </div>
+                        <div class="flex justify-center gap-4 my-6">
+                            <button class="sim-btn bg-blue-500 text-white px-4 py-2 rounded-lg" data-action="coin" data-amount="1">Flip 1</button>
+                            <button class="sim-btn bg-blue-500 text-white px-4 py-2 rounded-lg" data-action="coin" data-amount="100">Flip 100</button>
+                            <button class="sim-btn bg-gray-500 text-white px-4 py-2 rounded-lg" data-action="coin" data-amount="reset">Reset</button>
+                        </div>
+                        <table class="w-full result-table">
+                            <thead><tr class="bg-gray-100"><th>Outcome</th><th>Count</th><th>Experimental %</th><th>Theoretical %</th></tr></thead>
+                            <tbody id="coin-results"></tbody>
+                        </table>
+                    </div>
+                    <!-- Die Roll Sim -->
+                    <div id="sim-die" class="hidden">
+                        <div class="visual-area h-32 flex items-center justify-center">
+                            <img id="die-img" src="https://placehold.co/100x100/f87171/ffffff?text=1" class="h-24 w-24 rounded-lg">
+                        </div>
+                        <div class="flex justify-center gap-4 my-6">
+                            <button class="sim-btn bg-red-500 text-white px-4 py-2 rounded-lg" data-action="die" data-amount="1">Roll 1</button>
+                            <button class="sim-btn bg-red-500 text-white px-4 py-2 rounded-lg" data-action="die" data-amount="100">Roll 100</button>
+                            <button class="sim-btn bg-gray-500 text-white px-4 py-2 rounded-lg" data-action="die" data-amount="reset">Reset</button>
+                        </div>
+                        <table class="w-full result-table">
+                            <thead><tr class="bg-gray-100"><th>Outcome</th><th>Count</th><th>Experimental %</th><th>Theoretical %</th></tr></thead>
+                            <tbody id="die-results"></tbody>
+                        </table>
+                    </div>
+                    <!-- Card Draw Sim -->
+                    <div id="sim-card" class="hidden">
+                        <div class="visual-area h-32 flex items-center justify-center">
+                             <img id="card-img" src="https://placehold.co/80x120/ffffff/000000?text=?" class="h-28 w-20 rounded-lg border-2 border-gray-400">
+                        </div>
+                        <div class="flex justify-center gap-4 my-6">
+                            <button class="sim-btn bg-gray-800 text-white px-4 py-2 rounded-lg" data-action="card" data-amount="1">Draw 1</button>
+                            <button class="sim-btn bg-gray-800 text-white px-4 py-2 rounded-lg" data-action="card" data-amount="52">Draw 52</button>
+                            <button class="sim-btn bg-gray-500 text-white px-4 py-2 rounded-lg" data-action="card" data-amount="reset">Reset</button>
+                        </div>
+                        <table class="w-full result-table">
+                            <thead><tr class="bg-gray-100"><th>Outcome</th><th>Count</th><th>Experimental %</th><th>Theoretical %</th></tr></thead>
+                            <tbody id="card-results"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- State Management ---
+        let coinState = { heads: 0, tails: 0 };
+        let dieState = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+        let cardState = { '♥': 0, '♦': 0, '♣': 0, '♠': 0 };
+
+        // --- DOM Elements ---
+        const tabs = document.querySelectorAll('.tab-btn');
+        const sims = {
+            coin: document.getElementById('sim-coin'),
+            die: document.getElementById('sim-die'),
+            card: document.getElementById('sim-card')
+        };
+        const simButtons = document.querySelectorAll('.sim-btn');
+        const coinImg = document.getElementById('coin-img');
+        const dieImg = document.getElementById('die-img');
+        const cardImg = document.getElementById('card-img');
+
+        // --- Update Functions ---
+        function updateCoinTable() {
+            const total = coinState.heads + coinState.tails;
+            const resultsBody = document.getElementById('coin-results');
+            resultsBody.innerHTML = `
+                <tr><td>Heads</td><td>${coinState.heads}</td><td>${total ? (coinState.heads / total * 100).toFixed(1) : 0}%</td><td>50%</td></tr>
+                <tr><td>Tails</td><td>${coinState.tails}</td><td>${total ? (coinState.tails / total * 100).toFixed(1) : 0}%</td><td>50%</td></tr>
+            `;
+        }
+        
+        function updateDieTable() {
+            const total = Object.values(dieState).reduce((a, b) => a + b, 0);
+            const resultsBody = document.getElementById('die-results');
+            resultsBody.innerHTML = Object.keys(dieState).map(side => `
+                <tr><td>${side}</td><td>${dieState[side]}</td><td>${total ? (dieState[side] / total * 100).toFixed(1) : 0}%</td><td>16.7%</td></tr>
+            `).join('');
+        }
+
+        function updateCardTable() {
+            const total = Object.values(cardState).reduce((a, b) => a + b, 0);
+            const resultsBody = document.getElementById('card-results');
+            resultsBody.innerHTML = Object.keys(cardState).map(suit => `
+                <tr><td>${suit}</td><td>${cardState[suit]}</td><td>${total ? (cardState[suit] / total * 100).toFixed(1) : 0}%</td><td>25%</td></tr>
+            `).join('');
+        }
+
+        // --- Simulation Logic ---
+        function runSimulation(action, amount) {
+            if (amount === 'reset') {
+                if (action === 'coin') coinState = { heads: 0, tails: 0 };
+                if (action === 'die') dieState = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+                if (action === 'card') cardState = { '♥': 0, '♦': 0, '♣': 0, '♠': 0 };
+            } else {
+                for (let i = 0; i < parseInt(amount); i++) {
+                    if (action === 'coin') {
+                        Math.random() < 0.5 ? coinState.heads++ : coinState.tails++;
+                    }
+                    if (action === 'die') {
+                        const roll = Math.floor(Math.random() * 6) + 1;
+                        dieState[roll]++;
+                    }
+                    if (action === 'card') {
+                        const suits = ['♥', '♦', '♣', '♠'];
+                        const suit = suits[Math.floor(Math.random() * 4)];
+                        cardState[suit]++;
+                    }
+                }
+            }
+            
+            // Update UI
+            if (action === 'coin') {
+                coinImg.src = `https://placehold.co/100x100/${Math.random() < 0.5 ? 'facc15/ffffff?text=Heads' : 'd1d5db/000000?text=Tails'}`;
+                coinImg.parentElement.style.transform = 'rotateY(360deg)';
+                setTimeout(() => coinImg.parentElement.style.transform = '', 300);
+                updateCoinTable();
+            }
+            if (action === 'die') {
+                const lastRoll = Math.floor(Math.random() * 6) + 1;
+                dieImg.src = `https://placehold.co/100x100/f87171/ffffff?text=${lastRoll}`;
+                dieImg.parentElement.style.transform = 'rotate(360deg)';
+                setTimeout(() => dieImg.parentElement.style.transform = '', 300);
+                updateDieTable();
+            }
+            if (action === 'card') {
+                const suits = {'♥': 'ef4444', '♦': '3b82f6', '♣': '1f2937', '♠': '1f2937'};
+                const lastSuit = Object.keys(suits)[Math.floor(Math.random() * 4)];
+                cardImg.src = `https://placehold.co/80x120/ffffff/${suits[lastSuit]}?text=${encodeURIComponent(lastSuit)}`;
+                cardImg.parentElement.style.transform = 'rotateY(180deg)';
+                setTimeout(() => cardImg.parentElement.style.transform = '', 300);
+                updateCardTable();
+            }
+        }
+
+        // --- Event Listeners ---
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                Object.values(sims).forEach(sim => sim.classList.add('hidden'));
+                const simId = tab.id.split('-')[1];
+                sims[simId].classList.remove('hidden');
+            });
+        });
+
+        simButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                runSimulation(btn.dataset.action, btn.dataset.amount);
+            });
+        });
+
+        // --- Initial Setup ---
+        updateCoinTable();
+        updateDieTable();
+        updateCardTable();
+
+    </script>
+</body>
+</html>

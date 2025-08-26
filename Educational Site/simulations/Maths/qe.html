@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quadratic Equations - Interactive Science Lab</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* A very light gray */
+        }
+    </style>
+</head>
+<body class="py-12 px-4 md:px-8">
+
+    <!-- Main container -->
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 tracking-tight">
+                Quadratic Equations
+            </h1>
+            <p class="text-lg text-gray-600 mt-3 max-w-3xl mx-auto">
+                Adjust the coefficients a, b, and c in a quadratic equation and see how the parabolic curve changes in real-time.
+            </p>
+        </header>
+
+        <!-- Simulation Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <!-- Left Panel: Information & Controls -->
+            <div class="lg:col-span-1 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">The Equation</h2>
+                <p class="text-gray-600 mb-6 text-xl font-mono text-center bg-gray-100 p-4 rounded-lg">
+                    y = ax² + bx + c
+                </p>
+                
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Controls:</h3>
+                 <div class="space-y-4 mb-6">
+                    <div>
+                        <label for="slider-a" class="font-semibold">Coefficient a: <span id="label-a">1.0</span></label>
+                        <input type="range" id="slider-a" min="-5" max="5" value="1" step="0.1" class="w-full">
+                    </div>
+                     <div>
+                        <label for="slider-b" class="font-semibold">Coefficient b: <span id="label-b">0</span></label>
+                        <input type="range" id="slider-b" min="-10" max="10" value="0" step="0.1" class="w-full">
+                    </div>
+                    <div>
+                        <label for="slider-c" class="font-semibold">Coefficient c: <span id="label-c">0</span></label>
+                        <input type="range" id="slider-c" min="-10" max="10" value="0" step="0.1" class="w-full">
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-semibold text-gray-800 mb-3">Roots (where y = 0):</h3>
+                <div id="roots-display" class="text-lg font-mono bg-gray-50 p-4 rounded h-24">
+                    <!-- Roots will be displayed here by JS -->
+                </div>
+            </div>
+
+            <!-- Right Panel: Interactive Simulation -->
+            <div class="lg:col-span-2 bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+                <div class="w-full h-[60vh] relative">
+                    <canvas id="simulation-canvas" class="w-full h-full bg-white rounded-lg border"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('simulation-canvas');
+        const ctx = canvas.getContext('2d');
+        const sliderA = document.getElementById('slider-a');
+        const sliderB = document.getElementById('slider-b');
+        const sliderC = document.getElementById('slider-c');
+        
+        const labelA = document.getElementById('label-a');
+        const labelB = document.getElementById('label-b');
+        const labelC = document.getElementById('label-c');
+        const rootsDisplay = document.getElementById('roots-display');
+
+        let a = 1, b = 0, c = 0;
+        let origin = { x: 0, y: 0 };
+        let scale = 40; // Pixels per unit
+
+        function resizeCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
+            
+            origin.x = rect.width / 2;
+            origin.y = rect.height / 2;
+            
+            draw();
+        }
+
+        function drawAxes() {
+            const w = canvas.width / (window.devicePixelRatio || 1);
+            const h = canvas.height / (window.devicePixelRatio || 1);
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 1;
+
+            // X-Axis
+            ctx.beginPath();
+            ctx.moveTo(0, origin.y);
+            ctx.lineTo(w, origin.y);
+            ctx.stroke();
+
+            // Y-Axis
+            ctx.beginPath();
+            ctx.moveTo(origin.x, 0);
+            ctx.lineTo(origin.x, h);
+            ctx.stroke();
+
+            // Ticks
+            ctx.fillStyle = '#9ca3af';
+            ctx.font = '12px Inter';
+            for (let i = -Math.floor(origin.x / scale); i * scale < w; i++) {
+                if (i === 0) continue;
+                ctx.fillText(i, origin.x + i * scale, origin.y + 15);
+            }
+            for (let i = -Math.floor(origin.y / scale); i * scale < h; i++) {
+                if (i === 0) continue;
+                ctx.fillText(-i, origin.x + 5, origin.y + i * scale);
+            }
+        }
+        
+        function plotFunction() {
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+
+            for (let px = 0; px < canvas.width / (window.devicePixelRatio || 1); px++) {
+                const x = (px - origin.x) / scale;
+                const y = a * x * x + b * x + c;
+                const py = origin.y - y * scale;
+                if (px === 0) {
+                    ctx.moveTo(px, py);
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.stroke();
+        }
+
+        function draw() {
+            const w = canvas.width / (window.devicePixelRatio || 1);
+            const h = canvas.height / (window.devicePixelRatio || 1);
+            ctx.clearRect(0, 0, w, h);
+            
+            drawAxes();
+            plotFunction();
+            updateCalculations();
+        }
+        
+        function updateCalculations() {
+            labelA.textContent = a.toFixed(1);
+            labelB.textContent = b.toFixed(1);
+            labelC.textContent = c.toFixed(1);
+
+            // Quadratic formula: x = (-b ± sqrt(b^2 - 4ac)) / 2a
+            const discriminant = b * b - 4 * a * c;
+
+            if (a === 0) {
+                 rootsDisplay.innerHTML = `<p>This is a linear equation.</p>`;
+                 return;
+            }
+
+            if (discriminant > 0) {
+                const x1 = (-b + Math.sqrt(discriminant)) / (2 * a);
+                const x2 = (-b - Math.sqrt(discriminant)) / (2 * a);
+                rootsDisplay.innerHTML = `<p>Two real roots:</p><p>x₁ = ${x1.toFixed(2)}</p><p>x₂ = ${x2.toFixed(2)}</p>`;
+            } else if (discriminant === 0) {
+                const x1 = -b / (2 * a);
+                rootsDisplay.innerHTML = `<p>One real root:</p><p>x = ${x1.toFixed(2)}</p>`;
+            } else {
+                rootsDisplay.innerHTML = `<p>No real roots.</p>`;
+            }
+        }
+
+        function handleSliderChange() {
+            a = parseFloat(sliderA.value);
+            b = parseFloat(sliderB.value);
+            c = parseFloat(sliderC.value);
+            draw();
+        }
+
+        sliderA.addEventListener('input', handleSliderChange);
+        sliderB.addEventListener('input', handleSliderChange);
+        sliderC.addEventListener('input', handleSliderChange);
+
+        window.addEventListener('resize', resizeCanvas);
+
+        // Initial setup
+        resizeCanvas();
+
+    </script>
+</body>
+</html>

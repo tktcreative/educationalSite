@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maths Concepts - Interactive Science Lab</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* A very light gray */
+        }
+        .example-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .example-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+    </style>
+</head>
+<body class="py-12 px-4 md:px-8">
+
+    <!-- Main container -->
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-800 tracking-tight">
+                Maths Concepts
+            </h1>
+            <p class="text-lg text-gray-600 mt-3 max-w-2xl mx-auto">
+                Choose a simulation to explore key mathematical ideas in an interactive way.
+            </p>
+        </header>
+
+        <!-- Grid for Example Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <!-- Card 1: Pythagorean Theorem -->
+            <div class="example-card bg-white p-8 rounded-xl shadow-lg border border-gray-200 flex flex-col">
+                <div class="flex-grow">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-3">Pythagorean Theorem</h2>
+                    <p class="text-gray-600">Interactively change the sides of a right-angled triangle and see how a² + b² always equals c².</p>
+                </div>
+                <a href="simulations/Maths/pgt.html" class="mt-6 inline-flex items-center justify-center w-full bg-teal-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-teal-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Play Simulation
+                </a>
+            </div>
+
+            <!-- Card 2: Quadratic Equations -->
+            <div class="example-card bg-white p-8 rounded-xl shadow-lg border border-gray-200 flex flex-col">
+                <div class="flex-grow">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-3">Quadratic Equations</h2>
+                    <p class="text-gray-600">Adjust the coefficients a, b, and c in a quadratic equation and see how the parabolic curve changes in real-time.</p>
+                </div>
+                <a href="simulations/Maths/qe.html" class="mt-6 inline-flex items-center justify-center w-full bg-teal-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-teal-700 transition-colors">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Play Simulation
+                </a>
+            </div>
+
+            <!-- Card 3: Trigonometry -->
+            <div class="example-card bg-white p-8 rounded-xl shadow-lg border border-gray-200 flex flex-col">
+                <div class="flex-grow">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-3">Trigonometry (SOH CAH TOA)</h2>
+                    <p class="text-gray-600">Explore the relationships between angles and side lengths in a right-angled triangle to understand Sine, Cosine, and Tangent.</p>
+                </div>
+                <a href="simulations/Maths/trigonometry.html" class="mt-6 inline-flex items-center justify-center w-full bg-teal-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-teal-700 transition-colors">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Play Simulation
+                </a>
+            </div>
+
+            <!-- Card 4: Circle Theorems -->
+            <div class="example-card bg-white p-8 rounded-xl shadow-lg border border-gray-200 flex flex-col">
+                <div class="flex-grow">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-3">Circle Theorems</h2>
+                    <p class="text-gray-600">Visualize theorems like "angle at the center is double the angle at the circumference" by dragging points on a circle.</p>
+                </div>
+                <a href="simulations/Maths/ct.html" class="mt-6 inline-flex items-center justify-center w-full bg-teal-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-teal-700 transition-colors">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Play Simulation
+                </a>
+            </div>
+
+            <!-- Card 5: Probability -->
+            <div class="example-card bg-white p-8 rounded-xl shadow-lg border border-gray-200 flex flex-col">
+                <div class="flex-grow">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-3">Probability Explorer</h2>
+                    <p class="text-gray-600">Roll dice, flip coins, and draw cards hundreds of times in an instant to see experimental probability approach theoretical probability.</p>
+                </div>
+                <a href="simulations/Maths/probs.html" class="mt-6 inline-flex items-center justify-center w-full bg-teal-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-teal-700 transition-colors">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Play Simulation
+                </a>
+            </div>
+
+            <!-- Card 6: Linear Equations -->
+            <div class="example-card bg-white p-8 rounded-xl shadow-lg border border-gray-200 flex flex-col">
+                <div class="flex-grow">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-3">Linear Equations</h2>
+                    <p class="text-gray-600">Manipulate the slope (m) and y-intercept (c) in the equation y = mx + c to see how they affect the line on a graph.</p>
+                </div>
+                <a href="simulations/Maths/le.html" class="mt-6 inline-flex items-center justify-center w-full bg-teal-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-teal-700 transition-colors">
+                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Play Simulation
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
