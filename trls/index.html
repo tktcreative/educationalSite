@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+     <script>
+        let chain = {
+           steps :0,
+           up() {
+               this.steps++;
+               return this;
+           },
+           down() {
+               this.steps--;
+               return this;
+           },
+              showSteps() {
+                alert( this.steps );
+                return this;
+              }
+            
+        };
+        chain.up().up().down().up().up().showSteps();
+    </script>
+</body>
+</html>
