@@ -7,23 +7,46 @@
 </head>
 <body>
      <script>
-        let chain = {
-           steps :0,
-           up() {
-               this.steps++;
-               return this;
-           },
-           down() {
-               this.steps--;
-               return this;
-           },
-              showSteps() {
-                alert( this.steps );
-                return this;
-              }
+        // let chain = {
+        //    steps :0,
+        //    up() {
+        //        this.steps++;
+        //        return this;
+        //    },
+        //    down() {
+        //        this.steps--;
+        //        return this;
+        //    },
+        //       showSteps() {
+        //         alert( this.steps );
+        //         return this;
+        //       }
             
+        // };
+        // chain.up().up().down().up().up().showSteps();
+
+        function Calculator{
+
+            this.read = function(){
+                
+                let a = prompt("enter the value of a: ");
+                let b = prompt("enter value of b:");
+            };
+
+            this.add = function(){
+            return a + b;
+            };
+
+            this.mul = function(){
+            return a + b;
+            };
+
         };
-        chain.up().up().down().up().up().showSteps();
+
+        
+
+
+
     </script>
 </body>
 </html>
